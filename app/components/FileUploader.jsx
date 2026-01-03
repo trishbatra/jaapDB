@@ -3,9 +3,10 @@ import { HardDriveUpload } from "lucide-react";
 import Image from "next/image";
 import React, { useState } from "react";
 
-const FileUploader = () => {
+const FileUploader = (props) => {
   const [jaapFile, setjaapFile] = useState(null);
   const [jaapFileURL, setjaapFileURL] = useState(null);
+  console.log("props.isloading", props.isloading)
   const handleFileChange = async (e) => {
     if (!e.target.files[0]) return;
 
@@ -15,6 +16,8 @@ const FileUploader = () => {
   };
 
   const handleUpload = async () => {
+    props.setisloading(true)
+    props.setloadingText("saving ur jaap data...")
     if (!jaapFile) return;
     const form = new FormData();
     form.append("jaap", jaapFile);
@@ -22,9 +25,17 @@ const FileUploader = () => {
       method: "POST",
       body: form
     });
+
+    const res = await req.json()
+
+    console.log("res", res)
+    props.setisloading(false)
+    props.setloadingText("")
+
+
   };
   return (
-    <div className="absolute">
+    <div className={`absolute ${props.isloading  ? 'blur-lg'  : ''} `}>
       <div className="flex items-center bg-[#526D82] rounded-md w-56 ml-5">
         <div className="ml-2">
           <HardDriveUpload />
@@ -71,6 +82,7 @@ const FileUploader = () => {
           </ul>
 
           <button
+            onClick={() => { handleUpload() }}
             className="bg-[#526D82] p-2 capitalize
          rounded-md mt-3 cursor-pointer"
           >

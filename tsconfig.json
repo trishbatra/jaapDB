@@ -30,7 +30,7 @@
     "**/*.mts",
     "**/*.ts",
     "**/*.tsx"
-  ],
+, "app/prompt.js"  ],
   "exclude": [
     "node_modules"
   ]
