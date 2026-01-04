@@ -30,7 +30,7 @@
     "**/*.mts",
     "**/*.ts",
     "**/*.tsx"
-, "app/prompt.js"  ],
+, "app/prompt.js", "app/login/page.jsx"  ],
   "exclude": [
     "node_modules"
   ]
