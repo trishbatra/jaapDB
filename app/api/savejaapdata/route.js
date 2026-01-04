@@ -23,9 +23,14 @@ export async function POST (req, res){
     const form = await req.formData()
 
     const file = form.get("jaap")
+    const aajKiTarik = form.get("todaysDate")
 
-      if (!file) {
+    if (!file) {
       return new Response("No file uploaded", { status: 400 });
+    }
+
+    if (!aajKiTarik) {
+      return new Response("No date was passed", { status: 400 });
     }
 
 
@@ -67,26 +72,50 @@ export async function POST (req, res){
       "model" : "meta-llama/llama-4-scout-17b-16e-instruct"
     })
 
-    console.log("makeReq", makeReq)
-    console.log(
-      "makeReq.choices[0]?.message?.content ", 
-      typeof(makeReq.choices[0]?.message?.content ),
-      makeReq.choices[0]?.message?.content 
-   )
-
    const parsedResponse = await JSON.parse(
       makeReq.choices[0]?.message?.content.replace('```') )
 
-   console.log("parsedResponse", parsedResponse)
+    const start = new Date()
+    start.setHours(0,0,0,0)
+    const end = new Date()
+    end.setHours(23,60,60,999)
 
-   const savedDoc = new jaapModel({
-    mala : parsedResponse.mala,
-    dateAndTimeString : parsedResponse.date_and_time
-   })
 
-   const saved = await savedDoc.save()
-   
+    let checkIfExist = await jaapModel.findOne({
+      createdAt : { $gte : start , $lte : end }
+    })
 
-   return NextResponse.json(saved)
+    let returnObj;
+    if(checkIfExist && parsedResponse){
+      if (parsedResponse.mala > checkIfExist.mala) {
+        let findHowMuchMore = parsedResponse.mala - checkIfExist.mala
+        checkIfExist.mala += findHowMuchMore
+        await checkIfExist.save()
+        returnObj = {
+          message : "updated record",
+          record : checkIfExist
+        }
+      }else{
+         returnObj = {
+          message : "cant update because image caannot have less numbers than the previous record", 
+          record : checkIfExist
+        }
+      }
+
+      return NextResponse.json(returnObj)
+    }else{
+      const savedDoc = new jaapModel({
+        mala : parsedResponse.mala,
+        dateAndTimeString : parsedResponse.date_and_time
+      })
+      const saved = await savedDoc.save() 
+      returnObj = {
+        message : "jaap entery saved",
+        saved : saved
+      }
+      
+
+      return NextResponse.json(returnObj)
+    }
 
 }   

@@ -21,6 +21,8 @@ const FileUploader = (props) => {
     if (!jaapFile) return;
     const form = new FormData();
     form.append("jaap", jaapFile);
+    let todaysDate = new Date() 
+    form.append("todaysDate", todaysDate.getDate())
     const req = await fetch(`/api/savejaapdata`, {
       method: "POST",
       body: form
